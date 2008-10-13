@@ -1,4 +1,6 @@
-0.1 (xxxx-xx-xx)
-==================
+0.1jarn1 2008-10-13
+===================
 
- - Created recipe with ZopeSkel [Helge Tesdal].
+* Private release
+
+* Created recipe with ZopeSkel [Helge Tesdal].
