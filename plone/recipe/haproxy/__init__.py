@@ -5,13 +5,9 @@ import logging
 import os
 import shutil
 import tempfile
-import urllib2
-import urlparse
+import urllib
 
-try:
-    from hashlib import sha1
-except ImportError:
-    from sha import new as sha1
+from hashlib import sha1
 
 import setuptools.archive_util
 import zc.buildout
@@ -30,7 +26,7 @@ class Recipe(object):
         self.download_cache = buildout['buildout'].get('download-cache')
         self.install_from_cache = buildout['buildout'].get(
             'install-from-cache')
-        if isinstance(self.install_from_cache, (str, unicode)):
+        if isinstance(self.install_from_cache, (str, bytes)):
             self.install_from_cache = self.install_from_cache.lower() == 'true'
 
         if self.download_cache:
@@ -55,7 +51,7 @@ class Recipe(object):
         logger = logging.getLogger(self.name)
         dest = self.options['location']
         url = self.options.get('url',
-            'http://dist.plone.org/thirdparty/haproxy-1.4.8.zip')
+            'http://www.haproxy.org/download/2.1/src/haproxy-2.1.3.tar.gz')
         # TARGET=(linux24|linux26|solaris|freebsd|openbsd|generic)
         target = self.options.get('target', None)
         # USE_PCRE=1
@@ -122,12 +118,12 @@ class Recipe(object):
                 continue
             for filename in os.listdir(fullpath):
                 logger.info("Adding script wrapper for %s" % filename)
-                target=os.path.join(bintarget, filename)
-                f=open(target, "wt")
-                print >>f, "#!/bin/sh"
-                print >>f, 'exec %s "$@"' % os.path.join(fullpath, filename)
-                f.close()
-                os.chmod(target, 0755)
+                target = os.path.join(bintarget, filename)
+                with open(target, "wt") as f:
+                    f.write("#!/bin/sh\n")
+                    f.write('exec {} "$@"'.format(os.path.join(fullpath, filename)))
+
+                os.chmod(target, 0o755)
                 self.options.created(target)
 
         return dest
@@ -139,12 +135,12 @@ class Recipe(object):
 
 def getFromCache(url, name, download_cache=None, install_from_cache=False):
     if download_cache:
-        cache_fname = sha1(url).hexdigest()
+        cache_fname = sha1(url.encode('utf-8')).hexdigest()
         cache_name = os.path.join(download_cache, cache_fname)
         if not os.path.isdir(download_cache):
             os.mkdir(download_cache)
 
-    _, _, urlpath, _, _ = urlparse.urlsplit(url)
+    _, _, urlpath, _, _ = urllib.parse.urlsplit(url)
     filename = urlpath.split('/')[-1]
 
     # get the file from the right place
@@ -181,10 +177,10 @@ def getFromCache(url, name, download_cache=None, install_from_cache=False):
                 if filename != "cache.ini":
                     now = datetime.datetime.utcnow()
                     cache_ini = os.path.join(cache_name, "cache.ini")
-                    cache_ini = open(cache_ini, "w")
-                    print >>cache_ini, "[cache]"
-                    print >>cache_ini, "download_url =", url
-                    print >>cache_ini, "retrieved =", now.isoformat() + "Z"
+                    with open(cache_ini, "w") as cache_ini:
+                        cache_ini.write("[cache]")
+                        cache_ini.write("download_url ={}".format(url))
+                        cache_ini.write("retrieved ={}".format(now.isoformat() + "Z"))
                     cache_ini.close()
                 logging.getLogger(name).debug(
                     'Cache download %s as %s' % (url, cache_name))
@@ -193,7 +189,7 @@ def getFromCache(url, name, download_cache=None, install_from_cache=False):
                 tmp2 = tempfile.mkdtemp('buildout-' + name)
                 fname = os.path.join(tmp2, filename)
                 logging.getLogger(name).info('Downloading %s' % url)
-            open(fname, 'w').write(urllib2.urlopen(url).read())
+            open(fname, 'wb').write(urllib.request.urlopen(url).read())
         except:
             if tmp2 is not None:
                 shutil.rmtree(tmp2)
