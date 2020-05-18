@@ -8,7 +8,7 @@ Releases
   [erral]
 
 - Update to support python3 only
-  [erral]
+  [erral, petschki]
 
 1.1.2 (2012-01-26)
 ------------------
