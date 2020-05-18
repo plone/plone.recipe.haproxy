@@ -4,14 +4,17 @@
 Supported options
 =================
 
+Attention: Python3 only version! If you're using Python2 you have to pin
+this package version to <2.0.0.
+
 This recipe supports the following options:
 
 url
     URL pointing to the ``haproxy`` compressed archive. By default it uses:
-    http://dist.plone.org/thirdparty/haproxy-1.4.4.zip
+    http://www.haproxy.org/download/2.1/src/haproxy-2.1.3.tar.gz
 
 target
-    Target can be one of the following: 
+    Target can be one of the following:
     linux22, linux24, linux24e linux24eold, linux26, solaris, freebsd,
     openbsd, generic.
 
@@ -50,8 +53,7 @@ This will configure the default options for ``url``, ``target``, ``pcre``, and
 Reporting bugs or asking questions
 ==================================
 
-We have a shared bugtracker and help desk on Launchpad:
-https://bugs.launchpad.net/collective.buildout/
+https://github.com/plone/plone.recipe.haproxy/issues
 
 
 Code repository
