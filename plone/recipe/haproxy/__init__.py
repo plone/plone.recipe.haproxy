@@ -25,9 +25,7 @@ class Recipe(object):
         directory = buildout['buildout']['directory']
         self.download_cache = buildout['buildout'].get('download-cache')
         self.install_from_cache = buildout['buildout'].get(
-            'install-from-cache')
-        if isinstance(self.install_from_cache, (str, bytes)):
-            self.install_from_cache = self.install_from_cache.lower() == 'true'
+            'install-from-cache', '').lower() in ('true', b'true')
 
         if self.download_cache:
             # cache keys are hashes of url, to ensure repeatability if the
@@ -50,7 +48,8 @@ class Recipe(object):
         """Installer"""
         logger = logging.getLogger(self.name)
         dest = self.options['location']
-        url = self.options.get('url',
+        url = self.options.get(
+            'url',
             'http://www.haproxy.org/download/2.1/src/haproxy-2.1.3.tar.gz')
         # TARGET=(linux24|linux26|solaris|freebsd|openbsd|generic)
         target = self.options.get('target', None)
@@ -88,7 +87,7 @@ class Recipe(object):
             os.chdir(tmp)
             try:
                 if target in ('freebsd',):
-                    make = 'gmake' # Force the use of gmake on freebsd.
+                    make = 'gmake'  # Force the use of gmake on freebsd.
                 else:
                     make = 'make'
                 if not os.path.exists('Makefile'):
@@ -105,12 +104,12 @@ class Recipe(object):
                 system("%s PREFIX=%s install" % (make, dest))
             finally:
                 os.chdir(here)
-        except:
+        except Exception:
             shutil.rmtree(dest)
             raise
 
         # Add script wrappers
-        bintarget=self.buildout["buildout"]["bin-directory"]
+        bintarget = self.buildout["buildout"]["bin-directory"]
 
         for directory in ["bin", "sbin"]:
             fullpath = os.path.join(dest, directory)
@@ -121,7 +120,7 @@ class Recipe(object):
                 target = os.path.join(bintarget, filename)
                 with open(target, "wt") as f:
                     f.write("#!/bin/sh\n")
-                    f.write('exec {} "$@"'.format(os.path.join(fullpath, filename)))
+                    f.write('exec {} "$@"'.format(os.path.join(fullpath, filename)))  # noqa
 
                 os.chmod(target, 0o755)
                 self.options.created(target)
@@ -180,7 +179,7 @@ def getFromCache(url, name, download_cache=None, install_from_cache=False):
                     with open(cache_ini, "w") as cache_ini:
                         cache_ini.write("[cache]")
                         cache_ini.write("download_url ={}".format(url))
-                        cache_ini.write("retrieved ={}".format(now.isoformat() + "Z"))
+                        cache_ini.write("retrieved ={}".format(now.isoformat() + "Z"))  # noqa
                     cache_ini.close()
                 logging.getLogger(name).debug(
                     'Cache download %s as %s' % (url, cache_name))
@@ -190,7 +189,7 @@ def getFromCache(url, name, download_cache=None, install_from_cache=False):
                 fname = os.path.join(tmp2, filename)
                 logging.getLogger(name).info('Downloading %s' % url)
             open(fname, 'wb').write(urllib.request.urlopen(url).read())
-        except:
+        except Exception:
             if tmp2 is not None:
                 shutil.rmtree(tmp2)
             if download_cache:
