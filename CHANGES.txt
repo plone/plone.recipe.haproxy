@@ -1,8 +1,8 @@
 Releases
 =========
 
-2.0 (UNRELEASED)
-----------------
+2.0rc1 (2021-02-25)
+-------------------
 
 - Set haproxy 2.1 as default version
   [erral]
