@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '2.0rc2.dev0'
+version = '2.0.0'
 
 setup(
     name='plone.recipe.haproxy',
