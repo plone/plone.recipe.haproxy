@@ -4,7 +4,7 @@ Releases
 2.0rc2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Updated setup.py.
 
 
 2.0rc1 (2021-02-25)
